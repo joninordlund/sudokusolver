@@ -73,7 +73,7 @@ void DLXBuilder::build()
     }
     nodes.resize(nodeCount + N + 1);
 
-    // set node spacers
+    // set up spacer nodes
     int prev = -2;
     for (int i = N + 1; i < nodes.size(); i++)
     {
