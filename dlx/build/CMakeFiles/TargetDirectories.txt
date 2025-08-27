@@ -1,3 +1,0 @@
-/home/linuxguy/projects/cplusplus/dlx/build/CMakeFiles/DLX.dir
-/home/linuxguy/projects/cplusplus/dlx/build/CMakeFiles/edit_cache.dir
-/home/linuxguy/projects/cplusplus/dlx/build/CMakeFiles/rebuild_cache.dir
