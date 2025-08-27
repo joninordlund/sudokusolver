@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/linuxguy/projects/cplusplus/dlx/build",
+  "command": "/usr/bin/c++   -g -o CMakeFiles/DLX.dir/DLXBuilder.cpp.o -c /home/linuxguy/projects/cplusplus/dlx/DLXBuilder.cpp",
+  "file": "/home/linuxguy/projects/cplusplus/dlx/DLXBuilder.cpp",
+  "output": "CMakeFiles/DLX.dir/DLXBuilder.cpp.o"
+},
+{
+  "directory": "/home/linuxguy/projects/cplusplus/dlx/build",
+  "command": "/usr/bin/c++   -g -o CMakeFiles/DLX.dir/main.cpp.o -c /home/linuxguy/projects/cplusplus/dlx/main.cpp",
+  "file": "/home/linuxguy/projects/cplusplus/dlx/main.cpp",
+  "output": "CMakeFiles/DLX.dir/main.cpp.o"
+}
+]
