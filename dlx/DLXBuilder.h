@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vector>
 #include <iostream>
 
@@ -27,7 +26,4 @@ private:
 public:
     DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat) {};
     void build();
-
-private:
-    void makeHeader();
 };
