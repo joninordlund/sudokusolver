@@ -27,7 +27,7 @@ void DLXBuilder::build()
     }
     int maxSize = N * M + N + (N + 1); // matrix + header + spacers
     nodes.resize(maxSize);
-    nodes[0] = {-1, -1, N, 1}; // root node
+    nodes[0] = {-1, -1, N, 1, -1}; // root node
     matrix.insert(matrix.begin(), head);
 
     auto posMod = [](int a, int b)
@@ -72,6 +72,18 @@ void DLXBuilder::build()
         }
     }
     nodes.resize(nodeCount + N + 1);
+
+    // set node spacers
+    int prev = -2;
+    for (int i = N + 1; i < nodes.size(); i++)
+    {
+        if (nodes[i].col < 0)
+        {
+            nodes[i].up = prev + 1;
+            nodes[prev].down = i - 1;
+            prev = i;
+        }
+    }
 
     for (int i = 0; i < nodes.size(); i++)
     {
