@@ -23,6 +23,11 @@ private:
     std::vector<std::vector<int>> matrix;
     std::vector<int> lenVec;
 
+    void cover(int col);
+    void uncover(int col);
+    void hide(int i);
+    void unhide(int i);
+
 public:
     DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat) {};
     void build();
