@@ -74,12 +74,13 @@ void DLXBuilder::build()
     nodes.resize(nodeCount + N + 1);
 
     // set up spacer nodes
-    int prev = -2;
+    int prev = -1;
     for (int i = N + 1; i < nodes.size(); i++)
     {
         if (nodes[i].col < 0)
         {
-            nodes[i].up = prev + 1;
+            if (prev >= 0)
+                nodes[i].up = prev + 1;
             nodes[prev].down = i - 1;
             prev = i;
         }
@@ -127,8 +128,35 @@ void DLXBuilder::hide(int p)
 
 void DLXBuilder::uncover(int col)
 {
+    int left = nodes[col].left;
+    int right = nodes[col].right;
+    nodes[left].right = col;
+    nodes[right].left = col;
+    int p = nodes[col].up;
+    while (p != col)
+    {
+        p = nodes[p].up;
+    }
 }
 
-void DLXBuilder::unhide(int col)
+void DLXBuilder::unhide(int p)
 {
+    int q = p - 1;
+    while (q != p)
+    {
+        int x = nodes[q].col;
+        int up = nodes[q].up;
+        int down = nodes[q].down;
+        if (x < 0) // q is a spacer
+        {
+            q = down;
+        }
+        else
+        {
+            q = nodes[up].down;
+            q = nodes[down].up;
+            nodes[x].col = nodes[x].col + 1;
+            q--;
+        }
+    }
 }
