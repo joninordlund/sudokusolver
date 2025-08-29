@@ -13,7 +13,11 @@ struct Node
     int down = -1;
     int left = -1;
     int right = -1;
-    int col = -1; // either len or top
+
+    // col has here two roles: either len or top
+    // It's length of the column if the node is a header node,
+    // node's top node otherwise (i.e. column's header node)
+    int col = -1;
 };
 
 class DLXBuilder

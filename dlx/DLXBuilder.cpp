@@ -120,7 +120,7 @@ void DLXBuilder::hide(int p)
         {
             nodes[up].down = down;
             nodes[down].up = up;
-            nodes[x].col = nodes[x].col - 1;
+            nodes[x].col = nodes[x].col - 1; // col is here col length
             q++;
         }
     }
@@ -135,6 +135,7 @@ void DLXBuilder::uncover(int col)
     int p = nodes[col].up;
     while (p != col)
     {
+        unhide(p);
         p = nodes[p].up;
     }
 }
@@ -153,9 +154,9 @@ void DLXBuilder::unhide(int p)
         }
         else
         {
-            q = nodes[up].down;
-            q = nodes[down].up;
-            nodes[x].col = nodes[x].col + 1;
+            nodes[up].down = q;
+            nodes[down].up = q;
+            nodes[x].col = nodes[x].col + 1; // col is here col length
             q--;
         }
     }
