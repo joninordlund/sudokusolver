@@ -64,7 +64,7 @@ void DLXBuilder::build()
                 {
                     node.left = posMod(j, N + 1);
                     node.right = posMod(j + 2, N + 1);
-                    node.col = lenVec[j];
+                    node.len = lenVec[j];
                 }
                 nodes[matrix[i][j]] = node;
                 nodeCount++;
@@ -77,7 +77,7 @@ void DLXBuilder::build()
     int prev = -1;
     for (int i = N + 1; i < nodes.size(); i++)
     {
-        if (nodes[i].col < 0)
+        if (nodes[i].top < 0)
         {
             if (prev >= 0)
                 nodes[i].up = prev + 1;
@@ -87,7 +87,7 @@ void DLXBuilder::build()
     }
     for (int i = 0; i < nodes.size(); i++)
     {
-        nodes[i].print(i);
+        nodes[i].print(i, N);
     }
 }
 
@@ -109,7 +109,7 @@ void DLXBuilder::hide(int p)
     int q = p + 1;
     while (q != p)
     {
-        int x = nodes[q].col;
+        int x = nodes[q].top;
         int up = nodes[q].up;
         int down = nodes[q].down;
         if (x < 0) // q is a spacer
@@ -120,7 +120,7 @@ void DLXBuilder::hide(int p)
         {
             nodes[up].down = down;
             nodes[down].up = up;
-            nodes[x].col = nodes[x].col - 1; // col is here col length
+            nodes[x].len = nodes[x].len - 1;
             q++;
         }
     }
@@ -145,7 +145,7 @@ void DLXBuilder::unhide(int p)
     int q = p - 1;
     while (q != p)
     {
-        int x = nodes[q].col;
+        int x = nodes[q].top;
         int up = nodes[q].up;
         int down = nodes[q].down;
         if (x < 0) // q is a spacer
@@ -156,7 +156,7 @@ void DLXBuilder::unhide(int p)
         {
             nodes[up].down = q;
             nodes[down].up = q;
-            nodes[x].col = nodes[x].col + 1; // col is here col length
+            nodes[x].len = nodes[x].len + 1;
             q--;
         }
     }

@@ -2,22 +2,27 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
 
 struct Node
 {
-    void print(int idx)
+    void print(int idx, int N)
     {
-        std::cout << "idx: " << idx << "   up " << up << ", down " << down << ", left " << left << ", right " << right << ", col " << col << std::endl;
+        int x = top;
+        std::string str = " ,top ";
+        if (idx <= N)
+        {
+            x = len;
+            str = " ,len ";
+        }
+        std::cout << "idx: " << idx << "   up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << std::endl;
     }
     int up = -1;
     int down = -1;
     int left = -1;
     int right = -1;
-
-    // col has here two roles: either len or top
-    // It's length of the column if the node is a header node,
-    // node's top node otherwise (i.e. column's header node)
-    int col = -1;
+    int top = -1;
+    int len = -1;
 };
 
 class DLXBuilder
