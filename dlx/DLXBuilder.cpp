@@ -1,4 +1,5 @@
 #include "DLXBuilder.h"
+#include <cassert>
 
 void DLXBuilder::build()
 {
@@ -26,8 +27,16 @@ void DLXBuilder::build()
         head.push_back(i);
     }
     int maxSize = N * M + N + (N + 1); // matrix + header + spacers
+    nodes.clear();
     nodes.resize(maxSize);
-    nodes[0] = {-1, -1, N, 1, -1}; // root node
+
+    nodes[0].up = -1;
+    nodes[0].down = -1;
+    nodes[0].left = N;
+    nodes[0].right = 1;
+    nodes[0].top = -1;
+    nodes[0].len = -1;
+
     matrix.insert(matrix.begin(), head);
 
     auto posMod = [](int a, int b)
@@ -58,13 +67,24 @@ void DLXBuilder::build()
                     f = posMod(f + 1, M + 1);
                 }
                 int down = matrix[f][j];
-                Node node{up, down, -1, -1, j};
+                Node node;
+                node.up = up;
+                node.down = down;
+                node.left = -1;
+                node.right = -1;
 
                 if (i == 0)
                 {
                     node.left = posMod(j, N + 1);
                     node.right = posMod(j + 2, N + 1);
                     node.len = lenVec[j];
+                    node.top = -1;
+                }
+                else
+                {
+                    // data node: top on header index (1..N)
+                    node.top = j + 1;
+                    node.len = -1;
                 }
                 nodes[matrix[i][j]] = node;
                 nodeCount++;
@@ -73,15 +93,16 @@ void DLXBuilder::build()
     }
     nodes.resize(nodeCount + N + 1);
 
-    // set up spacer nodes
     int prev = -1;
     for (int i = N + 1; i < nodes.size(); i++)
     {
         if (nodes[i].top < 0)
         {
             if (prev >= 0)
+            {
                 nodes[i].up = prev + 1;
-            nodes[prev].down = i - 1;
+                nodes[prev].down = i - 1;
+            }
             prev = i;
         }
     }
@@ -93,15 +114,17 @@ void DLXBuilder::build()
 
 void DLXBuilder::cover(int col)
 {
+    int left = nodes[col].left;
+    int right = nodes[col].right;
+    nodes[right].left = left;
+    nodes[left].right = right;
+
     int p = nodes[col].down;
     while (p != col)
     {
         hide(p);
         p = nodes[p].down;
     }
-    int left = nodes[col].left;
-    int right = nodes[col].right;
-    nodes[left].right = nodes[right].left;
 }
 
 void DLXBuilder::hide(int p)
@@ -110,34 +133,34 @@ void DLXBuilder::hide(int p)
     while (q != p)
     {
         int x = nodes[q].top;
-        int up = nodes[q].up;
-        int down = nodes[q].down;
         if (x < 0) // q is a spacer
         {
-            q = up;
+            q = nodes[q].up;
+            continue;
         }
-        else
-        {
-            nodes[up].down = down;
-            nodes[down].up = up;
-            nodes[x].len = nodes[x].len - 1;
-            q++;
-        }
+        int up = nodes[q].up;
+        int down = nodes[q].down;
+
+        nodes[up].down = down;
+        nodes[down].up = up;
+        assert(x >= 0 && x < (int)nodes.size());
+        nodes[x].len = nodes[x].len - 1;
+        q++;
     }
 }
 
 void DLXBuilder::uncover(int col)
 {
-    int left = nodes[col].left;
-    int right = nodes[col].right;
-    nodes[left].right = col;
-    nodes[right].left = col;
     int p = nodes[col].up;
     while (p != col)
     {
         unhide(p);
         p = nodes[p].up;
     }
+    int left = nodes[col].left;
+    int right = nodes[col].right;
+    nodes[left].right = col;
+    nodes[right].left = col;
 }
 
 void DLXBuilder::unhide(int p)
@@ -146,18 +169,80 @@ void DLXBuilder::unhide(int p)
     while (q != p)
     {
         int x = nodes[q].top;
-        int up = nodes[q].up;
-        int down = nodes[q].down;
         if (x < 0) // q is a spacer
         {
-            q = down;
+            q = nodes[q].down;
+            continue;
         }
-        else
+        int up = nodes[q].up;
+        int down = nodes[q].down;
+
+        nodes[up].down = q;
+        nodes[down].up = q;
+        assert(x >= 0 && x < (int)nodes.size());
+        nodes[x].len = nodes[x].len + 1;
+        q--;
+    }
+}
+void DLXBuilder::search(int x)
+{
+    int rot = nodes[0].right;
+    if (nodes[0].right == 0)
+    {
+        std::cout << "Found solution" << std::endl;
+        return;
+    }
+
+    int col = chooseCol();
+    cover(col);
+    int r = nodes[col].down;
+    while (r != col)
+    {
+        solution[x] = r;
+
+        int j = r + 1;
+        while (j != r)
         {
-            nodes[up].down = q;
-            nodes[down].up = q;
-            nodes[x].len = nodes[x].len + 1;
-            q--;
+            if (nodes[j].top < 0) // spacer
+            {
+                j = nodes[j].up;
+                continue;
+            }
+            cover(nodes[j].top);
+            j++;
+        }
+        search(x + 1);
+        j = r - 1;
+        while (j != r)
+        {
+            if (nodes[j].top < 0) // spacer
+            {
+                j = nodes[j].down;
+                continue;
+            }
+            uncover(nodes[j].top);
+            j--;
+        }
+        r = nodes[r].down;
+    }
+    uncover(col);
+}
+int DLXBuilder::chooseCol()
+{
+    //
+    int best = -1;
+    int bestLen = 199999;
+
+    // käy header-renkaan läpi ja etsi pienin len
+    for (int c = nodes[0].right; c != 0; c = nodes[c].right)
+    {
+        if (nodes[c].len < bestLen)
+        {
+            bestLen = nodes[c].len;
+            best = c;
         }
     }
+    // Mahdollinen tilanteen tarkistus:
+    assert(best != -1); // header ei saisi olla tyhjä tässä kutsussa
+    return best;
 }

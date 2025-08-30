@@ -31,13 +31,16 @@ private:
     std::vector<Node> nodes;
     std::vector<std::vector<int>> matrix;
     std::vector<int> lenVec;
+    std::vector<int> solution;
 
     void cover(int col);
     void uncover(int col);
     void hide(int i);
     void unhide(int i);
+    int chooseCol();
 
 public:
-    DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat) {};
+    DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat) { solution.resize(matrix.size()); };
     void build();
+    void search(int x);
 };
