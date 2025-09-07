@@ -15,7 +15,7 @@ struct Node
             x = len;
             str = " ,len ";
         }
-        std::cout << "idx: " << idx << "   up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << std::endl;
+        std::cout << "idx: " << idx << ", row " << row << ", up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << std::endl;
     }
     int up = -1;
     int down = -1;
@@ -23,6 +23,7 @@ struct Node
     int right = -1;
     int top = -1;
     int len = -1;
+    int row = -1; // row in the original matrix
 };
 
 class DLXBuilder
@@ -32,6 +33,7 @@ private:
     std::vector<std::vector<int>> matrix;
     std::vector<int> lenVec;
     std::vector<int> solution;
+    int N, M;
 
     void cover(int col);
     void uncover(int col);
@@ -40,7 +42,12 @@ private:
     int chooseCol();
 
 public:
-    DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat) { solution.resize(matrix.size()); };
+    DLXBuilder(std::vector<std::vector<int>> mat) : matrix(mat)
+    {
+        M = matrix.size();
+        N = matrix[0].size();
+        solution.resize(M);
+    };
     void build();
     void search(int x);
 };

@@ -1,5 +1,6 @@
 #include "DLXBuilder.h"
 #include <cassert>
+#include <limits>
 
 void DLXBuilder::build()
 {
@@ -72,6 +73,7 @@ void DLXBuilder::build()
                 node.down = down;
                 node.left = -1;
                 node.right = -1;
+                node.row = i;
 
                 if (i == 0)
                 {
@@ -82,7 +84,6 @@ void DLXBuilder::build()
                 }
                 else
                 {
-                    // data node: top on header index (1..N)
                     node.top = j + 1;
                     node.len = -1;
                 }
@@ -186,10 +187,21 @@ void DLXBuilder::unhide(int p)
 }
 void DLXBuilder::search(int x)
 {
-    int rot = nodes[0].right;
+    static int max = 0;
     if (nodes[0].right == 0)
     {
         std::cout << "Found solution" << std::endl;
+        for (int i = 0; i < max + 1; i++)
+        {
+            int r = solution[i];
+            std::cout << "r" << nodes[r].row << ": ";
+            for (int j = 0; j < N; j++)
+            {
+                std::string str = (matrix[nodes[r].row][j] > 0) ? "1" : "0";
+                std::cout << str << " ";
+            }
+            std::cout << std::endl;
+        }
         return;
     }
 
@@ -198,6 +210,10 @@ void DLXBuilder::search(int x)
     int r = nodes[col].down;
     while (r != col)
     {
+        if (x > max)
+        {
+            max = x;
+        }
         solution[x] = r;
 
         int j = r + 1;
@@ -229,11 +245,9 @@ void DLXBuilder::search(int x)
 }
 int DLXBuilder::chooseCol()
 {
-    //
     int best = -1;
-    int bestLen = 199999;
+    int bestLen = std::numeric_limits<int>::max();
 
-    // käy header-renkaan läpi ja etsi pienin len
     for (int c = nodes[0].right; c != 0; c = nodes[c].right)
     {
         if (nodes[c].len < bestLen)
@@ -242,7 +256,5 @@ int DLXBuilder::chooseCol()
             best = c;
         }
     }
-    // Mahdollinen tilanteen tarkistus:
-    assert(best != -1); // header ei saisi olla tyhjä tässä kutsussa
     return best;
 }
