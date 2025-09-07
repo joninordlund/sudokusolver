@@ -17,13 +17,8 @@ struct Node
         }
         std::cout << "idx: " << idx << ", row " << row << ", up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << std::endl;
     }
-    int up = -1;
-    int down = -1;
-    int left = -1;
-    int right = -1;
-    int top = -1;
-    int len = -1;
-    int row = -1; // row in the original matrix
+    int up, down, left, right, top, len, row;
+    Node() : up(-1), down(-1), left(-1), right(-1), top(-1), len(-1), row(-1) {}
 };
 
 class DLXBuilder
