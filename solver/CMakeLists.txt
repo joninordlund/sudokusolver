@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(DLX VERSION 0.1.0 LANGUAGES C CXX)
 
-add_executable(DLX DLXBuilder.cpp main.cpp)
+add_executable(SOLVER DLXBuilder.cpp sudokusolver main.cpp)
 

@@ -1,5 +1,5 @@
 {
-  "cmake.sourceDirectory": "/home/linuxguy/projects/cplusplus/sudokusolver/dlx",
+  "cmake.sourceDirectory": "/home/linuxguy/projects/cplusplus/sudokusolver/solver",
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
