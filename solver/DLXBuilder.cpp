@@ -22,7 +22,7 @@ void DLXBuilder::build()
         idx++;
     }
 
-    std::vector<int> head;
+    vector<int> head;
     for (int i = 1; i <= N; i++)
     {
         head.push_back(i);
@@ -92,7 +92,7 @@ void DLXBuilder::build()
             }
         }
     }
-    nodes.resize(nodeCount + N + 1);
+    nodes.resize(nodeCount + M + 2);
 
     int prev = -1;
     for (int i = N + 1; i < nodes.size(); i++)
@@ -190,18 +190,18 @@ void DLXBuilder::search(int x)
     static int max = 0;
     if (nodes[0].right == 0)
     {
-        std::cout << "Found solution" << std::endl;
-        for (int i = 0; i < max + 1; i++)
-        {
-            int r = solution[i];
-            std::cout << "r" << nodes[r].row << ": ";
-            for (int j = 0; j < N; j++)
-            {
-                std::string str = (matrix[nodes[r].row][j] > 0) ? "1" : "0";
-                std::cout << str << " ";
-            }
-            std::cout << std::endl;
-        }
+        cout << "Found solution" << endl;
+        // for (int i = 0; i < max + 1; i++)
+        // {
+        //     int r = solution[i];
+        //     cout << "r" << nodes[r].row << ": ";
+        //     for (int j = 0; j < N; j++)
+        //     {
+        //         string str = (matrix[nodes[r].row][j] > 0) ? "1" : "0";
+        //         cout << str << " ";
+        //     }
+        //     cout << endl;
+        // }
         return;
     }
 
@@ -246,7 +246,7 @@ void DLXBuilder::search(int x)
 int DLXBuilder::chooseCol()
 {
     int best = -1;
-    int bestLen = std::numeric_limits<int>::max();
+    int bestLen = numeric_limits<int>::max();
 
     for (int c = nodes[0].right; c != 0; c = nodes[c].right)
     {

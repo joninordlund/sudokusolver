@@ -2,11 +2,12 @@
 
 #include <vector>
 using namespace std;
-
+using Matrix = vector<vector<int>>;
 class SudokuSolver
 {
 
 public:
     SudokuSolver() {}
-    vector<vector<int>> makeSudokuMatrix();
+    Matrix makeSudokuMatrix(Matrix sudoku);
+    Matrix removeGivenDigits(const Matrix &mat);
 };
