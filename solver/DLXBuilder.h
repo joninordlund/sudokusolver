@@ -32,7 +32,11 @@ private:
     vector<int> lenVec;
     vector<int> solution;
     int N, M;
+    bool solutionFound;
+    int solutionSize;
 
+    void build();
+    void search(int x);
     void cover(int col);
     void uncover(int col);
     void hide(int i);
@@ -40,12 +44,11 @@ private:
     int chooseCol();
 
 public:
-    DLXBuilder(Matrix mat) : matrix(mat)
+    DLXBuilder(Matrix mat) : matrix(mat), solutionFound(false), solutionSize(0)
     {
         M = matrix.size();
         N = matrix[0].size();
         solution.resize(M);
     };
-    void build();
-    void search(int x);
+    Matrix findSolution();
 };

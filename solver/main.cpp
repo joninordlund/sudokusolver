@@ -10,7 +10,7 @@ Matrix matrix{
     {0, 1, 0, 0, 0, 0, 1},
     {0, 0, 0, 1, 1, 0, 1}};
 // sivu 298
-Matrix sudoku{
+const Matrix sudoku{
     {0, 0, 0, 2, 0, 5, 0, 0, 0},
     {0, 0, 8, 0, 0, 0, 2, 0, 0},
     {0, 5, 0, 8, 0, 9, 0, 1, 0},
@@ -30,8 +30,9 @@ int main()
     SudokuSolver solver;
     Matrix mat = solver.makeSudokuMatrix(sudoku);
     DLXBuilder builder(mat);
-    builder.build();
-    builder.search(0);
+    Matrix solution = builder.findSolution();
+    // builder.build();
+    // builder.search(0);
     cout << "Size: " << mat.size() << " * " << mat[0].size() << endl;
     return 0;
 }

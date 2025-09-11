@@ -9,5 +9,4 @@ class SudokuSolver
 public:
     SudokuSolver() {}
     Matrix makeSudokuMatrix(Matrix sudoku);
-    Matrix removeGivenDigits(const Matrix &mat);
 };

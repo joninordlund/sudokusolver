@@ -1,7 +1,42 @@
 #include "DLXBuilder.h"
-#include <cassert>
 #include <limits>
+#include <cassert>
 
+using namespace std;
+
+Matrix DLXBuilder::findSolution()
+{
+    build();
+    search(0);
+    solutionSize++;
+    if (!solutionFound)
+    {
+        std::cout << "No solution found!\n";
+        return {};
+    }
+    // in a normal 9x9 sudoku, solution size should always be 81:
+    assert(solutionSize == 81);
+    cout << "Solution found!\n";
+    solution.resize(solutionSize);
+
+    int count = 0;
+    for (int i : solution)
+    {
+        for (int j = 0; j < 81; j++)
+        {
+            if (matrix[i][j] > 0)
+            {
+                count++;
+                cout << matrix[i][j] % 9;
+            }
+        }
+        // cout << matrix[i][j] << ",";
+    }
+    cout << endl;
+}
+cout << "Count: " << count << endl;
+return {};
+}
 void DLXBuilder::build()
 {
     int M = matrix.size();
@@ -144,7 +179,6 @@ void DLXBuilder::hide(int p)
 
         nodes[up].down = down;
         nodes[down].up = up;
-        assert(x >= 0 && x < (int)nodes.size());
         nodes[x].len = nodes[x].len - 1;
         q++;
     }
@@ -180,28 +214,15 @@ void DLXBuilder::unhide(int p)
 
         nodes[up].down = q;
         nodes[down].up = q;
-        assert(x >= 0 && x < (int)nodes.size());
         nodes[x].len = nodes[x].len + 1;
         q--;
     }
 }
 void DLXBuilder::search(int x)
 {
-    static int max = 0;
     if (nodes[0].right == 0)
     {
-        cout << "Found solution" << endl;
-        // for (int i = 0; i < max + 1; i++)
-        // {
-        //     int r = solution[i];
-        //     cout << "r" << nodes[r].row << ": ";
-        //     for (int j = 0; j < N; j++)
-        //     {
-        //         string str = (matrix[nodes[r].row][j] > 0) ? "1" : "0";
-        //         cout << str << " ";
-        //     }
-        //     cout << endl;
-        // }
+        solutionFound = true;
         return;
     }
 
@@ -210,11 +231,11 @@ void DLXBuilder::search(int x)
     int r = nodes[col].down;
     while (r != col)
     {
-        if (x > max)
+        if (x > solutionSize)
         {
-            max = x;
+            solutionSize = x;
         }
-        solution[x] = r;
+        solution[x] = nodes[r].row;
 
         int j = r + 1;
         while (j != r)

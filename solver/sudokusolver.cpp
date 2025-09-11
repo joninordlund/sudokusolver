@@ -37,5 +37,3 @@ Matrix SudokuSolver::makeSudokuMatrix(Matrix sudoku)
     }
     return mat;
 }
-
-Matrix SudokuSolver::removeGivenDigits(const Matrix &mat) {}
