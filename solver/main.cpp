@@ -1,6 +1,18 @@
 #include <vector>
 #include "DLXBuilder.h"
 #include "sudokusolver.h"
+#include <algorithm>
+
+const Matrix sudoku{
+    {0, 0, 0, 2, 0, 5, 0, 0, 0},
+    {0, 0, 8, 0, 0, 0, 2, 0, 0},
+    {0, 5, 0, 8, 0, 9, 0, 1, 0},
+    {9, 0, 7, 0, 0, 0, 8, 0, 6},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {6, 0, 2, 0, 0, 0, 3, 0, 9},
+    {0, 4, 0, 1, 0, 8, 0, 3, 0},
+    {0, 0, 6, 0, 0, 0, 5, 0, 0},
+    {0, 0, 0, 5, 0, 4, 0, 0, 0}};
 
 Matrix matrix{
     {0, 0, 1, 0, 1, 0, 0},
@@ -9,30 +21,326 @@ Matrix matrix{
     {1, 0, 0, 1, 0, 1, 0},
     {0, 1, 0, 0, 0, 0, 1},
     {0, 0, 0, 1, 1, 0, 1}};
+
 // sivu 298
-const Matrix sudoku{
-    {0, 0, 0, 2, 0, 5, 0, 0, 0},
-    {0, 0, 8, 0, 0, 0, 2, 0, 0},
-    {0, 5, 0, 8, 0, 9, 0, 1, 0},
-    {9, 0, 7, 0, 0, 0, 8, 0, 6},
+
+const Matrix sudoku0{
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {6, 0, 2, 0, 0, 0, 3, 0, 0},
-    {0, 4, 0, 1, 0, 8, 0, 3, 0},
-    {0, 0, 6, 0, 0, 0, 5, 0, 0},
-    {0, 0, 0, 5, 0, 4, 0, 0, 0}};
-// std::, <std::vector<int>> matrix{
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0}};
+
 //     {0, 0, 1, 0},
 //     {1, 0, 1, 1},
 //     {0, 1, 0, 0}};
+Matrix mat6 = {
+    {0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0},
+    {1, 1, 0, 0, 0},
+    {0, 0, 1, 0, 0},
+    {0, 0, 0, 1, 0},
+    {0, 0, 1, 0, 0},
+    {0, 1, 0, 0, 0}};
+
+Matrix matid = {{1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 1, 1, 0},
+                {0, 0, 0, 1}};
+Matrix mat7 = {{1, 0, 0, 0},
+               {0, 1, 0, 0},
+               {0, 1, 1, 0},
+               {0, 0, 0, 1}};
+
+bool validateExactCover(const Matrix &mat, const std::vector<int> &chosenRows)
+{
+    if (chosenRows.empty())
+        return false;
+    int nCols = mat[0].size();
+    std::vector<int> coverCount(nCols, 0);
+
+    for (int row : chosenRows)
+    {
+        for (int c = 0; c < nCols; ++c)
+        {
+            if (mat[row - 1][c] == 1)
+            {
+                coverCount[c]++;
+            }
+        }
+    }
+
+    for (int c = 0; c < nCols; ++c)
+    {
+        if (coverCount[c] != 1)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ======== Testit ========
+void runTests()
+{
+    std::vector<Matrix> tests = {
+        // 1) Identiteetti (pitäisi onnistua)
+        {{1, 0, 0, 0},
+         {0, 1, 0, 0},
+         {0, 0, 1, 0},
+         {0, 0, 0, 1}},
+
+        // 2) Rivi puuttuu → ei ratkaisua
+        {{1, 0, 0},
+         {0, 1, 0}},
+
+        // 3) Päällekkäiset rivit (vain toinen voi olla mukana)
+        {{1, 1, 0},
+         {1, 1, 0},
+         {0, 0, 1}},
+
+        // 4) Sun mat6, joka bugitti
+        {{0, 0, 0, 0, 1},
+         {1, 0, 0, 0, 0},
+         {1, 1, 0, 0, 0},
+         {0, 0, 1, 0, 0},
+         {0, 0, 0, 1, 0},
+         {0, 0, 1, 0, 0},
+         {0, 1, 0, 0, 0}},
+
+        {{
+             0,
+             1,
+             1,
+             1,
+             1,
+             0,
+             0,
+             0,
+             1,
+             0,
+         },
+         {
+             1,
+             1,
+             1,
+             1,
+             0,
+             1,
+             0,
+             1,
+             0,
+             1,
+         },
+         {
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+         },
+         {
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+         },
+         {
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+         },
+         {
+             0,
+             1,
+             1,
+             1,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+         },
+         {
+             0,
+             0,
+             0,
+             0,
+             0,
+             0,
+             1,
+             0,
+             0,
+             0,
+         }},
+        // 5) Triviaalisti tyhjä (ei ratkaisua)
+        {{0, 0, 0}}};
+
+    int testNum = 1;
+    for (const auto &mat : tests)
+    {
+        DLXBuilder dlx(mat);
+        std::cout << "=== Testi " << testNum++ << " ===\n";
+        dlx.findSolution();
+        std::cout << "DLX solutionFound = " << (dlx.solutionFound ? "YES" : "NO") << "\n";
+
+        if (dlx.solutionFound)
+        {
+            bool ok = validateExactCover(mat, dlx.solution);
+            cout << "Rows: ";
+            for (int f = 0; f < dlx.solutionSize; f++)
+            {
+                cout << dlx.solution[f] << " ";
+            }
+            cout << endl;
+            std::cout << "Validation = " << (ok ? "VALID ✅" : "INVALID ❌") << "\n";
+        }
+        std::cout << "\n";
+    }
+}
 
 int main()
 {
     SudokuSolver solver;
-    Matrix mat = solver.makeSudokuMatrix(sudoku);
-    DLXBuilder builder(mat);
-    Matrix solution = builder.findSolution();
-    // builder.build();
-    // builder.search(0);
-    cout << "Size: " << mat.size() << " * " << mat[0].size() << endl;
+    Matrix bat;
+    Matrix mat = solver.makeSudokuMatrix(sudoku, bat);
+    cout << "Bat size: " << bat.size() << "*" << bat[0].size() << endl;
+    DLXBuilder builder(bat);
+    vector<int> solution = builder.findSolution();
+    // runTests();
+    // builder.printSudoku();
+
+    // cout << "Size: " << mat.size() << " * " << mat[0].size() << endl;
     return 0;
 }

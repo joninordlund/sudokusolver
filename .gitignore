@@ -41,3 +41,8 @@
 *.dwo
 build/
 .sentry-native/
+
+# test_verion
+solver_test_version/
+
+esimsudoku.pdf

@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include "sudokusolver.h"
 
 using namespace std;
 using Matrix = vector<vector<int>>;
@@ -18,7 +19,7 @@ struct Node
             x = len;
             str = " ,len ";
         }
-        cout << "idx: " << idx << ", row " << row << ", up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << endl;
+        std::cout << "idx: " << idx << ", row " << row << ", up " << up << ", down " << down << ", left " << left << ", right " << right << str << x << endl;
     }
     int up, down, left, right, top, len, row;
     Node() : up(-1), down(-1), left(-1), right(-1), top(-1), len(-1), row(-1) {}
@@ -26,7 +27,7 @@ struct Node
 
 class DLXBuilder
 {
-private:
+public:
     vector<Node> nodes;
     Matrix matrix;
     vector<int> lenVec;
@@ -34,6 +35,7 @@ private:
     int N, M;
     bool solutionFound;
     int solutionSize;
+    std::vector<std::vector<int>> allSolutions;
 
     void build();
     void search(int x);
@@ -42,6 +44,9 @@ private:
     void hide(int i);
     void unhide(int i);
     int chooseCol();
+    void debugStructure();
+    void printRows();
+    void validateRows5C();
 
 public:
     DLXBuilder(Matrix mat) : matrix(mat), solutionFound(false), solutionSize(0)
@@ -50,5 +55,10 @@ public:
         N = matrix[0].size();
         solution.resize(M);
     };
-    Matrix findSolution();
+    vector<int> findSolution();
+    bool validateSolutionDebug();
+
+    void checkSpacers();
+    void print(vector<Choice> rowMapping);
+    void printSudoku();
 };
