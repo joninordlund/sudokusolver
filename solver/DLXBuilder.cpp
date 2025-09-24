@@ -8,42 +8,12 @@ vector<int> DLXBuilder::findSolution()
 {
     build();
     search(0);
-
-    // solutionSize++;
-    // if (allSolutions.size() > 1)
-    // {
-    //     std::cout << "Sudoku has multiple solutions: " << allSolutions.size() << "\n";
-    // }
-    // else
-    // {
     std::cout << "Sol size: " << solutionSize << endl;
-    // std::cout << "Sudoku has unique solution\n";
     solution.resize(solutionSize);
     validateSolutionDebug();
-    printSudoku();
     return solution;
 }
 
-void DLXBuilder::print(vector<Choice> rowMapping)
-{
-    int solNum = 0;
-    solution = allSolutions[solNum];
-    int count = 0;
-    cout << "!!!!!!!!!!!!!!   " << allSolutions[solNum].size() << endl;
-    std::sort(allSolutions[solNum].begin(), allSolutions[solNum].end());
-    for (int k = 0; k < allSolutions[solNum].size(); k++)
-    {
-        int nodeIdx = allSolutions[solNum][k];
-        int rowIdx = nodes[nodeIdx].row;
-        cout << "Row: " << rowIdx << " .... Node: " << nodeIdx << endl;
-        // if (rowIdx != -1)
-        count++;
-
-        // auto choice = rowMapping[rowIdx];
-        // std::cout << "(" << choice.row << "," << choice.col << ")=" << choice.digit << "\n";
-    }
-    cout << "Count: " << count << endl;
-}
 void DLXBuilder::printSudoku()
 {
     int grid[9][9] = {0};
@@ -281,209 +251,11 @@ void DLXBuilder::build()
     // {
     //     nodes[i].print(i, N);
     // }
-    checkSpacers();
+    // checkSpacers();
     // printRows();
     // validateRows5C();
 }
 
-void DLXBuilder::debugStructure()
-{
-    std::cout << "=== Spacer Check ===\n";
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if (nodes[i].top == -1) // spacer
-        {
-            int up = nodes[i].up;
-            int down = nodes[i].down;
-            std::cout << "Spacer idx " << i
-                      << " up=" << up
-                      << " down=" << down;
-
-            if (up != -1 && nodes[up].down != i)
-                std::cout << "  [mismatch: up->down=" << nodes[up].down << "]";
-            if (down != -1 && nodes[down].up != i)
-                std::cout << "  [mismatch: down->up=" << nodes[down].up << "]";
-            std::cout << "\n";
-        }
-    }
-
-    std::cout << "\n=== Row Traversal ===\n";
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if (nodes[i].top == -1) // spacer
-        {
-            std::cout << "Row spacer idx " << i << ":\n";
-
-            int q = nodes[i].up; // rivin ensimmäinen node
-            if (q == -1)
-            {
-                std::cout << "  (empty row)\n";
-                continue;
-            }
-
-            int start = q;
-            do
-            {
-                std::cout << "  idx " << q
-                          << " row=" << nodes[q].row
-                          << " top=" << nodes[q].top
-                          << " up=" << nodes[q].up
-                          << " down=" << nodes[q].down
-                          << "\n";
-
-                q = nodes[q].down;
-            } while (q != start && q != -1);
-
-            std::cout << "  -> back to spacer " << i << "\n";
-        }
-    }
-}
-void DLXBuilder::checkSpacers()
-{
-    std::cout << "=== Spacer Debug ===\n";
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if (nodes[i].top == -1) // tämä on spacer
-        {
-            int up = nodes[i].up;
-            int down = nodes[i].down;
-
-            std::cout << "Spacer idx " << i
-                      << " | up=" << up
-                      << " (row=" << (up >= 0 ? nodes[up].row : -1) << ")"
-                      << " down=" << down
-                      << " (row=" << (down >= 0 ? nodes[down].row : -1) << ")";
-
-            if (up >= 0 && nodes[up].top >= 0)
-                std::cout << " ✅ up ok";
-            else if (up != -1)
-                std::cout << " ❌ up epäilyttävä";
-
-            if (down >= 0 && nodes[down].top >= 0)
-                std::cout << " ✅ down ok";
-            else if (down != -1)
-                std::cout << " ❌ down epäilyttävä";
-
-            std::cout << "\n";
-        }
-    }
-}
-void DLXBuilder::printRows()
-{
-    std::cout << "=== Row Traversal Debug ===\n";
-    for (size_t i = N + 2; i < nodes.size(); i++)
-    {
-        if (nodes[i].top == -1) // spacer
-        {
-            std::cout << "Row spacer idx " << i << ":\n";
-
-            int q = nodes[i].up; // rivin ensimmäinen node
-            if (q == -1)
-            {
-                std::cout << "  (empty row)\n";
-                continue;
-            }
-
-            int start = q;
-            do
-            {
-                std::cout << "  idx " << q
-                          << " row=" << nodes[q].row
-                          << " top=" << nodes[q].top
-                          << " up=" << nodes[q].up
-                          << " down=" << nodes[q].down
-                          << "\n";
-
-                q = nodes[q].down; // etene rivissä alaspäin
-            } while (q != start && q != -1);
-
-            std::cout << "  -> back to spacer " << i << "\n";
-        }
-    }
-}
-
-void DLXBuilder::validateRows5C()
-{
-    std::cout << "=== 5C Row Validation ===\n";
-
-    for (int i = 0; i < (int)nodes.size(); i++)
-    {
-        if (nodes[i].top == -1 && i != 0)
-        { // spacer (paitsi header 0)
-            int spacer = i;
-            std::cout << "Row starting at spacer " << spacer << ":\n";
-
-            int q = nodes[spacer].up; // spacer.up = rivin alku
-            int start = q;
-            bool ok = true;
-
-            while (true)
-            {
-                std::cout << "  idx " << q
-                          << " row=" << nodes[q].row
-                          << " top=" << nodes[q].top
-                          << " up=" << nodes[q].up
-                          << " down=" << nodes[q].down
-                          << "\n";
-
-                // turvacheck: ei saa jäädä ikilenkkiin
-                if (nodes[q].top == -1 && q != spacer)
-                {
-                    std::cout << "   ⚠ Virhe: spacer keskellä riviä!\n";
-                    ok = false;
-                    break;
-                }
-
-                // jos tullaan takaisin spacerille, lopetetaan
-                if (q == spacer)
-                    break;
-
-                q++;
-                if (q >= (int)nodes.size())
-                {
-                    std::cout << "   ⚠ Virhe: indeksi karkasi ulos!\n";
-                    ok = false;
-                    break;
-                }
-            }
-
-            if (ok)
-            {
-                std::cout << "  ✅ Rivi on validi renkaana spacer " << spacer << " ympärillä.\n";
-            }
-        }
-    }
-}
-std::string constraintName(int col)
-{
-    if (col < 81)
-    {
-        int i = col / 9;
-        int j = col % 9;
-        return "Cell(" + std::to_string(i) + "," + std::to_string(j) + ")";
-    }
-    else if (col < 162)
-    {
-        int idx = col - 81;
-        int i = idx / 9;
-        int n = (idx % 9) + 1;
-        return "Row(" + std::to_string(i) + ") num " + std::to_string(n);
-    }
-    else if (col < 243)
-    {
-        int idx = col - 162;
-        int j = idx / 9;
-        int n = (idx % 9) + 1;
-        return "Col(" + std::to_string(j) + ") num " + std::to_string(n);
-    }
-    else
-    {
-        int idx = col - 243;
-        int b = idx / 9;
-        int n = (idx % 9) + 1;
-        return "Box(" + std::to_string(b) + ") num " + std::to_string(n);
-    }
-}
 bool DLXBuilder::validateSolutionDebug()
 {
     if (!solutionFound)
@@ -552,6 +324,7 @@ bool DLXBuilder::validateSolutionDebug()
 
     return ok;
 }
+
 void DLXBuilder::cover(int col)
 {
     // std::cout << "Covering col " << col << "\n";
@@ -624,42 +397,28 @@ void DLXBuilder::unhide(int p)
         q--;
     }
 }
+
 void DLXBuilder::search(int x)
 {
     if (solutionFound)
+    {
         return;
-
+    }
     if (nodes[0].right == 0)
     {
         solutionFound = true;
         solutionSize = x;
         std::cout << "\nSolution found! " << x << " rows: \n";
-        // for (int i = 0; i < x; i++)
-        //     std::cout << solution[i] << " ";
-        // std::cout << "\n";
         return;
     }
 
     int col = chooseCol();
-    // std::cout << "\n==> Covering col " << col
-    //           << " | Current stack: [ ";
-    // for (int i = 0; i < x; i++)
-    //     std::cout << solution[i] << " ";
-    // std::cout << "]\n";
-
     cover(col);
 
     int r = nodes[col].down;
     while (r != col)
     {
-        // solution[x] = r;
         solution[x] = nodes[r].row;
-        //  std::cout << "Pick row " << nodes[r].row
-        //            << " (node " << r << ") | Stack: [ ";
-        //  for (int i = 0; i <= x; i++)
-        //      std::cout << solution[i] << " ";
-        //  std::cout << "]\n";
-
         int j = r + 1;
         while (j != r)
         {
@@ -668,15 +427,11 @@ void DLXBuilder::search(int x)
                 j = nodes[j].up;
                 continue;
             }
-            // std::cout << "   -> Row " << nodes[r].row
-            //           << " covers col " << nodes[j].top
-            //           << " via node " << j << "\n";
+
             cover(nodes[j].top);
             j++;
         }
-
         search(x + 1);
-
         // Backtrack
         int t = r - 1;
         while (t != r)
@@ -686,85 +441,17 @@ void DLXBuilder::search(int x)
                 t = nodes[t].down;
                 continue;
             }
-            // std::cout << "   <- Uncover col " << nodes[t].top
-            //           << " from row " << nodes[r].row
-            //           << " via node " << t << "\n";
+
             uncover(nodes[t].top);
             t--;
         }
-
-        // std::cout << "Backtracking from row " << nodes[r].row
-        //           << " | Stack before pop: [ ";
-        // for (int i = 0; i <= x; i++)
-        //     std::cout << solution[i] << " ";
-        // std::cout << "]\n";
-
         r = nodes[r].down;
         if (solutionFound)
             return;
     }
-
     uncover(col);
-    // std::cout << "<== Uncovered col " << col
-    //           << " | Returning to depth " << x << "\n";
 }
 
-// void DLXBuilder::search(int x)
-// {
-//     if (solutionFound)
-//     {
-//         return;
-//     }
-//     if (nodes[0].right == 0)
-//     {
-//         solutionFound = true;
-//         // solution.resize(solutionSize + 1);
-//         // allSolutions.push_back(solution);
-//         // solution.clear();
-//         return;
-//     }
-
-//     int col = chooseCol();
-//     cover(col);
-//     int r = nodes[col].down;
-//     while (r != col)
-//     {
-//         // std::cout << "Trying row " << nodes[r].row << " via node " << r << "\n";
-//         if (x > solutionSize)
-//         {
-//             solutionSize = x;
-//         }
-//         // solution[x] = r;
-//         solution[x] = nodes[r].row;
-//         std::cout << "Pick row " << nodes[r].row << "\n";
-//         int j = r + 1;
-//         while (j != r)
-//         {
-//             if (nodes[j].top < 0) // spacer
-//             {
-//                 j = nodes[j].up;
-//                 continue;
-//             }
-//             std::cout << "Row " << nodes[r].row << " covers col " << nodes[j].top << "\n";
-//             cover(nodes[j].top);
-//             j++;
-//         }
-//         search(x + 1);
-//         int t = r - 1;
-//         while (t != r)
-//         {
-//             if (nodes[t].top < 0) // spacer
-//             {
-//                 t = nodes[t].down;
-//                 continue;
-//             }
-//             uncover(nodes[t].top);
-//             t--;
-//         }
-//         r = nodes[r].down;
-//     }
-//     uncover(col);
-// }
 int DLXBuilder::chooseCol()
 {
     int best = -1;

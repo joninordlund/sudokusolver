@@ -1,20 +1,14 @@
 #pragma once
 
 #include <vector>
-using namespace std;
-using Matrix = vector<vector<int>>;
+using Matrix = std::vector<std::vector<int>>;
+using Cell = std::tuple<int, int, int>;
 
-struct Choice
-{
-    int row, col, digit;
-};
-
+// Sudokupohja:
+// https://sudokupad.app/yttrio/sightline-sum-whisper-loop
 class SudokuSolver
 {
-    std::vector<Choice> rowMapping;
-
 public:
     SudokuSolver() {}
-    Matrix makeSudokuMatrix(const Matrix &sudoku);
-    std::vector<Choice> getRowMapping() { return rowMapping; };
+    std::pair<Matrix, std::vector<Cell>> makeSudokuMatrix(const Matrix &sudoku);
 };

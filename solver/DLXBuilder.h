@@ -45,8 +45,6 @@ public:
     void unhide(int i);
     int chooseCol();
     void debugStructure();
-    void printRows();
-    void validateRows5C();
 
 public:
     DLXBuilder(Matrix mat) : matrix(mat), solutionFound(false), solutionSize(0)
@@ -58,7 +56,5 @@ public:
     vector<int> findSolution();
     bool validateSolutionDebug();
 
-    void checkSpacers();
-    void print(vector<Choice> rowMapping);
     void printSudoku();
 };
