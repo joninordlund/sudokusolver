@@ -20,19 +20,17 @@ Matrix SudokuSolver::makeSudokuMatrix(const Matrix &sudoku)
             {
                 vector<int> row;
                 row.resize(4 * 81);
-                if (sudoku[i][j] != 0 && sudoku[i][j] != n)
+                if (sudoku[i][j] == 0 || sudoku[i][j] == n)
                 {
-                    continue;
+                    // constraints
+                    int box = (i / 3) * 3 + (j / 3);
+                    row[i * 9 + j] = 1;               // cell
+                    row[81 + i * 9 + (n - 1)] = 1;    // row
+                    row[162 + j * 9 + (n - 1)] = 1;   // column
+                    row[243 + box * 9 + (n - 1)] = 1; // box
+
+                    mat.push_back(std::move(row));
                 }
-
-                // constraints
-                int box = (i / 3) * 3 + (j / 3);
-                row[i * 9 + j] = 1;               // cell
-                row[81 + i * 9 + (n - 1)] = 1;    // row
-                row[162 + j * 9 + (n - 1)] = 1;   // column
-                row[243 + box * 9 + (n - 1)] = 1; // box
-
-                mat.push_back(std::move(row));
             }
         }
     }

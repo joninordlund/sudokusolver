@@ -85,6 +85,31 @@ bool validateExactCover(const Matrix &mat, const std::vector<int> &chosenRows)
 }
 
 // ======== Testit ========
+void validateRowMapping()
+{
+    int rowId = 0;
+    for (int r = 0; r < 9; r++)
+    {
+        for (int c = 0; c < 9; c++)
+        {
+            for (int d = 1; d <= 9; d++)
+            {
+                int rr = rowId / 81;
+                int cc = (rowId / 9) % 9;
+                int dd = rowId % 9 + 1;
+
+                if (rr != r || cc != c || dd != d)
+                {
+                    cout << "Mismatch! rowId=" << rowId
+                         << " expected (" << r << "," << c << "," << d
+                         << ") got (" << rr << "," << cc << "," << dd << ")\n";
+                }
+                rowId++;
+            }
+        }
+    }
+    cout << "Validation done.\n";
+}
 void runTests()
 {
     std::vector<Matrix> tests = {
@@ -103,243 +128,51 @@ void runTests()
          {1, 1, 0},
          {0, 0, 1}},
 
-        // 4) Sun mat6, joka bugitti
-        {{0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0},
-         {1, 1, 0, 0, 0},
-         {0, 0, 1, 0, 0},
-         {0, 0, 0, 1, 0},
-         {0, 0, 1, 0, 0},
-         {0, 1, 0, 0, 0}},
-
-        {{
-             0,
-             1,
-             1,
-             1,
-             1,
-             0,
-             0,
-             0,
-             1,
-             0,
-         },
-         {
-             1,
-             1,
-             1,
-             1,
-             0,
-             1,
-             0,
-             1,
-             0,
-             1,
-         },
-         {
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-         },
-         {
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-         },
-         {
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-         },
-         {
-             0,
-             1,
-             1,
-             1,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-         },
-         {
-             0,
-             0,
-             0,
-             0,
-             0,
-             0,
-             1,
-             0,
-             0,
-             0,
-         }},
         // 5) Triviaalisti tyhjä (ei ratkaisua)
         {{0, 0, 0}}};
 
     int testNum = 1;
-    for (const auto &mat : tests)
-    {
-        DLXBuilder dlx(mat);
-        std::cout << "=== Testi " << testNum++ << " ===\n";
-        dlx.findSolution();
-        std::cout << "DLX solutionFound = " << (dlx.solutionFound ? "YES" : "NO") << "\n";
+    // for (const auto &mat : tests)
+    // {
+    SudokuSolver solver;
+    Matrix mat1 = solver.makeSudokuMatrix(sudoku);
 
-        if (dlx.solutionFound)
+    DLXBuilder dlx(mat1);
+    std::cout << "=== Testi " << testNum++ << " ===\n";
+    dlx.findSolution();
+    std::cout << "DLX solutionFound = " << (dlx.solutionFound ? "YES" : "NO") << "\n";
+
+    if (dlx.solutionFound)
+    {
+        bool ok = validateExactCover(mat1, dlx.solution);
+        cout << "Rows: \n";
+        for (int f = 0; f < dlx.solutionSize; f++)
         {
-            bool ok = validateExactCover(mat, dlx.solution);
-            cout << "Rows: ";
-            for (int f = 0; f < dlx.solutionSize; f++)
-            {
-                cout << dlx.solution[f] << " ";
-            }
-            cout << endl;
-            std::cout << "Validation = " << (ok ? "VALID ✅" : "INVALID ❌") << "\n";
+            cout << dlx.solution[f] << " ";
+            // for (int g = 0; g < 90; g++)
+            // {
+            //     int e = dlx.solution[f];
+            //     cout << mat1[e - 1][g];
+            // }
+            // cout << endl;
         }
-        std::cout << "\n";
+        cout << endl;
+        std::cout << "Validation = " << (ok ? "VALID ✅" : "INVALID ❌") << "\n";
     }
+    std::cout << "\n";
+    // }
 }
 
 int main()
 {
     SudokuSolver solver;
-    Matrix bat;
-    Matrix mat = solver.makeSudokuMatrix(sudoku, bat);
-    cout << "Bat size: " << bat.size() << "*" << bat[0].size() << endl;
-    DLXBuilder builder(bat);
-    vector<int> solution = builder.findSolution();
-    // runTests();
-    // builder.printSudoku();
+
+    Matrix mat = solver.makeSudokuMatrix(sudoku);
+    DLXBuilder builder(mat);
+    validateRowMapping();
+    // vector<int> solution = builder.findSolution();
+    runTests();
+    // builder.printSudoku(sudoku);
 
     // cout << "Size: " << mat.size() << " * " << mat[0].size() << endl;
     return 0;

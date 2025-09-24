@@ -20,6 +20,7 @@ vector<int> DLXBuilder::findSolution()
     // std::cout << "Sudoku has unique solution\n";
     solution.resize(solutionSize);
     validateSolutionDebug();
+    printSudoku();
     return solution;
 }
 
@@ -45,31 +46,121 @@ void DLXBuilder::print(vector<Choice> rowMapping)
 }
 void DLXBuilder::printSudoku()
 {
-    std::sort(solution.begin(), solution.end());
     int grid[9][9] = {0};
 
-    for (int row : solution)
+    // for (int rowIdx : solution)
+    // {
+    // alkuperäinen matriisirivi löytyy tästä
+
+    // const std::vector<int> &matRow = matrix[rowIdx + 1];
+    // cout << "muro" << matRow[0] << endl;
+    // int i = -1, j = -1, n = -1;
+
+    // cell constraint
+    //     for (int k = 0; k < 81; k++)
+    //     {
+    //         if (matRow[k] >= 1)
+    //         {
+    //             i = k / 9;
+    //             j = k % 9;
+    //             break;
+    //         }
+    //     }
+
+    //     // row constraint -> kertoo n
+    //     for (int k = 81; k < 162; k++)
+    //     {
+    //         if (matRow[k] >= 1)
+    //         {
+    //             n = (k - 81) % 9 + 1;
+    //             break;
+    //         }
+    //     }
+
+    //     if (i >= 0 && j >= 0 && n > 0)
+    //         grid[i][j] = n;
+    //     else
+    //         std::cerr << "⚠️ Virhe rivin tulkinnassa: rowIdx=" << rowIdx << "\n";
+    // }
+
+    // // tulostus
+    // for (int r = 0; r < 9; r++)
+    // {
+    //     if (r % 3 == 0 && r != 0)
+    //         std::cout << "------+-------+------\n";
+    //     for (int c = 0; c < 9; c++)
+    //     {
+    //         if (c % 3 == 0 && c != 0)
+    //             std::cout << "| ";
+    //         std::cout << grid[r][c] << " ";
+    //     }
+    //     std::cout << "\n";
+    // }
+
+    const Matrix originalSudoku{
+        {0, 0, 0, 2, 0, 5, 0, 0, 0},
+        {0, 0, 8, 0, 0, 0, 2, 0, 0},
+        {0, 5, 0, 8, 0, 9, 0, 1, 0},
+        {9, 0, 7, 0, 0, 0, 8, 0, 6},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {6, 0, 2, 0, 0, 0, 3, 0, 9},
+        {0, 4, 0, 1, 0, 8, 0, 3, 0},
+        {0, 0, 6, 0, 0, 0, 5, 0, 0},
+        {0, 0, 0, 5, 0, 4, 0, 0, 0}};
+
+    for (int i = 0; i < 9; i++)
     {
-        int rowIndex = nodes[row].row;
-        cout << rowIndex << endl;
-        if (rowIndex == 0)
-            continue; // ohita tyhjät
+        for (int j = 0; j < 9; j++)
+        {
+            if (originalSudoku[i][j] != 0)
+            {
+                grid[i][j] = originalSudoku[i][j];
+            }
+        }
+    }
+    for (int rowID : solution)
+    {
+        // älä käytä +1 sokkona -> ota suoraan oikea rivi
+        const std::vector<int> &matRow = matrix[rowID];
 
-        int mapIndex = nodes[row].row; // vähennä header
-        int r = mapIndex / 81;
-        int c = (mapIndex / 9) % 9;
-        int d = (mapIndex % 9) + 1;
+        int i = -1, j = -1, n = -1;
 
-        grid[r][c] = d;
+        // cell constraint (0..80)
+        for (int k = 0; k < 81; k++)
+        {
+            if (matRow[k])
+            {
+                i = k / 9;
+                j = k % 9;
+                break;
+            }
+        }
+
+        // row constraint (81..161) → numero
+        for (int k = 81; k < 162; k++)
+        {
+            if (matRow[k])
+            {
+                n = (k - 81) % 9 + 1;
+                break;
+            }
+        }
+
+        std::cout << "rowID=" << rowID << " -> i=" << i
+                  << " j=" << j << " n=" << n << "\n";
+
+        if (i >= 0 && j >= 0 && n > 0)
+        {
+            if (grid[i][j] == 0) // älä korvaa vihjettä
+                grid[i][j] = n;
+        }
     }
 
-    // Tulostetaan nätisti
+    // Tulostus
     for (int r = 0; r < 9; r++)
     {
         if (r % 3 == 0 && r != 0)
-        {
             std::cout << "------+-------+------\n";
-        }
         for (int c = 0; c < 9; c++)
         {
             if (c % 3 == 0 && c != 0)
@@ -172,7 +263,7 @@ void DLXBuilder::build()
         }
     }
     nodes.resize(nodeCount + M + 2);
-
+    cout << "!!!!!!!!!!!!!!!!! " << nodeCount << "????? " << nodes[nodeCount - 1].row << endl;
     int prev = -1;
     for (int i = N + 1; i < nodes.size(); i++)
     {
@@ -190,7 +281,7 @@ void DLXBuilder::build()
     // {
     //     nodes[i].print(i, N);
     // }
-    // checkSpacers();
+    checkSpacers();
     // printRows();
     // validateRows5C();
 }
@@ -463,7 +554,7 @@ bool DLXBuilder::validateSolutionDebug()
 }
 void DLXBuilder::cover(int col)
 {
-    std::cout << "Covering col " << col << "\n";
+    // std::cout << "Covering col " << col << "\n";
     int left = nodes[col].left;
     int right = nodes[col].right;
     nodes[right].left = left;
@@ -500,7 +591,7 @@ void DLXBuilder::hide(int p)
 
 void DLXBuilder::uncover(int col)
 {
-    std::cout << "Uncovering col " << col << "\n";
+    // std::cout << "Uncovering col " << col << "\n";
     int p = nodes[col].up;
     while (p != col)
     {
@@ -542,19 +633,19 @@ void DLXBuilder::search(int x)
     {
         solutionFound = true;
         solutionSize = x;
-        std::cout << "\n✅ Ratkaisu löytyi! Solution size=" << x << "\nRows: ";
-        for (int i = 0; i < x; i++)
-            std::cout << solution[i] << " ";
-        std::cout << "\n";
+        std::cout << "\nSolution found! " << x << " rows: \n";
+        // for (int i = 0; i < x; i++)
+        //     std::cout << solution[i] << " ";
+        // std::cout << "\n";
         return;
     }
 
     int col = chooseCol();
-    std::cout << "\n==> Covering col " << col
-              << " | Current stack: [ ";
-    for (int i = 0; i < x; i++)
-        std::cout << solution[i] << " ";
-    std::cout << "]\n";
+    // std::cout << "\n==> Covering col " << col
+    //           << " | Current stack: [ ";
+    // for (int i = 0; i < x; i++)
+    //     std::cout << solution[i] << " ";
+    // std::cout << "]\n";
 
     cover(col);
 
@@ -563,13 +654,12 @@ void DLXBuilder::search(int x)
     {
         // solution[x] = r;
         solution[x] = nodes[r].row;
-        std::cout << "Pick row " << nodes[r].row
-                  << " (node " << r << ") | Stack: [ ";
-        for (int i = 0; i <= x; i++)
-            std::cout << solution[i] << " ";
-        std::cout << "]\n";
+        //  std::cout << "Pick row " << nodes[r].row
+        //            << " (node " << r << ") | Stack: [ ";
+        //  for (int i = 0; i <= x; i++)
+        //      std::cout << solution[i] << " ";
+        //  std::cout << "]\n";
 
-        // Mitä sarakkeita tämä rivi peittää
         int j = r + 1;
         while (j != r)
         {
@@ -578,9 +668,9 @@ void DLXBuilder::search(int x)
                 j = nodes[j].up;
                 continue;
             }
-            std::cout << "   -> Row " << nodes[r].row
-                      << " covers col " << nodes[j].top
-                      << " via node " << j << "\n";
+            // std::cout << "   -> Row " << nodes[r].row
+            //           << " covers col " << nodes[j].top
+            //           << " via node " << j << "\n";
             cover(nodes[j].top);
             j++;
         }
@@ -596,18 +686,18 @@ void DLXBuilder::search(int x)
                 t = nodes[t].down;
                 continue;
             }
-            std::cout << "   <- Uncover col " << nodes[t].top
-                      << " from row " << nodes[r].row
-                      << " via node " << t << "\n";
+            // std::cout << "   <- Uncover col " << nodes[t].top
+            //           << " from row " << nodes[r].row
+            //           << " via node " << t << "\n";
             uncover(nodes[t].top);
             t--;
         }
 
-        std::cout << "Backtracking from row " << nodes[r].row
-                  << " | Stack before pop: [ ";
-        for (int i = 0; i <= x; i++)
-            std::cout << solution[i] << " ";
-        std::cout << "]\n";
+        // std::cout << "Backtracking from row " << nodes[r].row
+        //           << " | Stack before pop: [ ";
+        // for (int i = 0; i <= x; i++)
+        //     std::cout << solution[i] << " ";
+        // std::cout << "]\n";
 
         r = nodes[r].down;
         if (solutionFound)
@@ -615,8 +705,8 @@ void DLXBuilder::search(int x)
     }
 
     uncover(col);
-    std::cout << "<== Uncovered col " << col
-              << " | Returning to depth " << x << "\n";
+    // std::cout << "<== Uncovered col " << col
+    //           << " | Returning to depth " << x << "\n";
 }
 
 // void DLXBuilder::search(int x)
