@@ -55,7 +55,7 @@ void runTests()
     DLXBuilder dlx(res.first);
     auto solution = dlx.findSolution();
     std::cout << "DLX solutionFound = " << (dlx.solutionFound ? "YES" : "NO") << "\n";
-    std::cout << "Rows: " << res.second.size() << std::endl;
+    std::cout << "Rows after removing clues: " << res.second.size() << "/729" << std::endl;
     Matrix solved(9, std::vector<int>(9, 0));
 
     for (int rowID : solution)
